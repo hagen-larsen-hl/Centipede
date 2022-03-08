@@ -9,6 +9,12 @@ namespace CS5410
     {
         private SpriteFont m_font;
         private const string MESSAGE = "Isn't this game fun!";
+        
+        public override void initialize(GraphicsDevice graphicsDevice, GraphicsDeviceManager graphics)
+        {
+            m_graphics = graphics;
+            m_spriteBatch = new SpriteBatch(graphicsDevice);
+        }
 
         public override void loadContent(ContentManager contentManager)
         {

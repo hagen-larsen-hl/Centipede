@@ -1,6 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Input;
 
 namespace CS5410
 {
@@ -20,8 +22,8 @@ namespace CS5410
 
         protected override void Initialize()
         {
-            m_graphics.PreferredBackBufferWidth = 1920;
-            m_graphics.PreferredBackBufferHeight = 1080;
+            m_graphics.PreferredBackBufferWidth = 1366;
+            m_graphics.PreferredBackBufferHeight = 768;
 
             m_graphics.ApplyChanges();
 
@@ -30,8 +32,8 @@ namespace CS5410
             m_states.Add(GameStateEnum.MainMenu, new MainMenuView());
             m_states.Add(GameStateEnum.GamePlay, new GamePlayView());
             m_states.Add(GameStateEnum.HighScores, new HighScoresView());
-            m_states.Add(GameStateEnum.Help, new HelpView());
-            m_states.Add(GameStateEnum.About, new AboutView());
+            m_states.Add(GameStateEnum.Help, new ControlsView());
+            m_states.Add(GameStateEnum.About, new CreditsView());
 
             // We are starting with the main menu
             m_currentState = m_states[GameStateEnum.MainMenu];
@@ -65,7 +67,7 @@ namespace CS5410
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Color.Gray);
 
             m_currentState.render(gameTime);
 

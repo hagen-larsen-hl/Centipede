@@ -5,10 +5,16 @@ using Microsoft.Xna.Framework.Input;
 
 namespace CS5410
 {
-    public class AboutView : GameStateView
+    public class CreditsView : GameStateView
     {
         private SpriteFont m_font;
         private const string MESSAGE = "*I* wrote this amazing game!";
+        
+        public override void initialize(GraphicsDevice graphicsDevice, GraphicsDeviceManager graphics)
+        {
+            m_graphics = graphics;
+            m_spriteBatch = new SpriteBatch(graphicsDevice);
+        }
 
         public override void loadContent(ContentManager contentManager)
         {

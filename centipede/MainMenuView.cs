@@ -21,6 +21,12 @@ namespace CS5410
 
         private MenuState m_currentSelection = MenuState.NewGame;
         private bool m_waitForKeyRelease = false;
+        
+        public override void initialize(GraphicsDevice graphicsDevice, GraphicsDeviceManager graphics)
+        {
+            m_graphics = graphics;
+            m_spriteBatch = new SpriteBatch(graphicsDevice);
+        }
 
         public override void loadContent(ContentManager contentManager)
         {
