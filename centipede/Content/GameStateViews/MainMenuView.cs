@@ -1,4 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.IO;
+using System.IO.IsolatedStorage;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
+using centipede.Content.Input;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -9,6 +14,7 @@ namespace CS5410
     {
         private SpriteFont m_fontMenu;
         private SpriteFont m_fontMenuSelect;
+        private KeyboardInput m_inputHandler;
 
         private enum MenuState
         {
@@ -20,12 +26,21 @@ namespace CS5410
         }
 
         private MenuState m_currentSelection = MenuState.NewGame;
+        private GameStateEnum m_currentView = GameStateEnum.MainMenu;
         private bool m_waitForKeyRelease = false;
+        private bool saving;
+        private bool loading;
+        private Objects.Controls m_keyboardLayout;
         
         public override void initialize(GraphicsDevice graphicsDevice, GraphicsDeviceManager graphics)
         {
             m_graphics = graphics;
             m_spriteBatch = new SpriteBatch(graphicsDevice);
+
+            m_inputHandler = new KeyboardInput();
+            m_inputHandler.registerCommand("up", Keys.Up, true, navigateUp);
+            m_inputHandler.registerCommand("down", Keys.Down, true, navigateDown);
+            m_inputHandler.registerCommand("enter", Keys.Enter, true, selectMenuOption);
         }
 
         public override void loadContent(ContentManager contentManager)
@@ -35,50 +50,51 @@ namespace CS5410
         }
         public override GameStateEnum processInput(GameTime gameTime)
         {
-            // This is the technique I'm using to ensure one keypress makes one menu navigation move
-            if (!m_waitForKeyRelease)
-            {
-                // Arrow keys to navigate the menu
-                if (Keyboard.GetState().IsKeyDown(Keys.Down))
-                {
-                    m_currentSelection = m_currentSelection + 1;
-                    m_waitForKeyRelease = true;
-                }
-                if (Keyboard.GetState().IsKeyDown(Keys.Up))
-                {
-                    m_currentSelection = m_currentSelection - 1;
-                    m_waitForKeyRelease = true;
-                }
-                
-                // If enter is pressed, return the appropriate new state
-                if (Keyboard.GetState().IsKeyDown(Keys.Enter) && m_currentSelection == MenuState.NewGame)
-                {
-                    return GameStateEnum.GamePlay;
-                }
-                if (Keyboard.GetState().IsKeyDown(Keys.Enter) && m_currentSelection == MenuState.HighScores)
-                {
-                    return GameStateEnum.HighScores;
-                }
-                if (Keyboard.GetState().IsKeyDown(Keys.Enter) && m_currentSelection == MenuState.Help)
-                {
-                    return GameStateEnum.Help;
-                }
-                if (Keyboard.GetState().IsKeyDown(Keys.Enter) && m_currentSelection == MenuState.About)
-                {
-                    return GameStateEnum.About;
-                }
-                if (Keyboard.GetState().IsKeyDown(Keys.Enter) && m_currentSelection == MenuState.Quit)
-                {
-                    return GameStateEnum.Exit;
-                }
-            }
-            else if (Keyboard.GetState().IsKeyUp(Keys.Down) && Keyboard.GetState().IsKeyUp(Keys.Up))
-            {
-                m_waitForKeyRelease = false;
-            }
-
-            return GameStateEnum.MainMenu;
+            m_currentView = GameStateEnum.MainMenu;
+            m_inputHandler.Update(gameTime);
+            return m_currentView;
         }
+
+        private void navigateUp(GameTime gameTime)
+        {
+            if (m_currentSelection != MenuState.NewGame)
+            {
+                m_currentSelection -= 1;
+            }
+        }
+
+        private void navigateDown(GameTime gameTime)
+        {
+            if (m_currentSelection != MenuState.Quit)
+            {
+                m_currentSelection += 1;
+            }
+        }
+
+        private void selectMenuOption(GameTime gameTime)
+        {
+            if (m_currentSelection == MenuState.NewGame)
+            {
+                m_currentView = GameStateEnum.GamePlay;
+            }
+            if (m_currentSelection == MenuState.HighScores)
+            {
+                m_currentView = GameStateEnum.HighScores;
+            }
+            if (m_currentSelection == MenuState.Help)
+            {
+                m_currentView = GameStateEnum.Help;
+            }
+            if (m_currentSelection == MenuState.About)
+            {
+                m_currentView = GameStateEnum.About;
+            }
+            if (m_currentSelection == MenuState.Quit)
+            {
+                m_currentView = GameStateEnum.Exit;
+            }
+        }
+        
         public override void update(GameTime gameTime)
         {
         }
