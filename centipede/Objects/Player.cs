@@ -12,13 +12,13 @@ namespace CS5410.Objects
         {
             this.lives = lives;
             Origin = vector;
-            Position = vector;
+            Center = vector;
             Size = size;
             Speed = 0.6f;
             Score = score;
             Boundary = new Rectangle(
-                (int) Position.X,
-                (int) Position.Y,
+                (int) (Center.X - Size.X / 2),
+                (int) (Center.Y - Size.Y / 2),
                 (int) Size.X,
                 (int) Size.Y
             );
@@ -29,7 +29,7 @@ namespace CS5410.Objects
             return lives > 0;
         }
 
-        public Vector2 Position { get; set; }
+        public Vector2 Center { get; set; }
 
         public Vector2 Origin { get; }
 
@@ -43,10 +43,10 @@ namespace CS5410.Objects
 
         public void setPosition(Vector2 vector)
         {
-            Position = vector;
+            Center = vector;
             Boundary = new Rectangle(
-                (int) Position.X,
-                (int) Position.Y,
+                (int) (Center.X - Size.X / 2),
+                (int) (Center.Y - Size.Y / 2),
                 (int) Size.X,
                 (int) Size.Y
             );

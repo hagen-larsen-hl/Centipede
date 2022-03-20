@@ -7,6 +7,6 @@
         HighScores,
         Help,
         About,
-        Exit
+        Exit,
     }
 }
