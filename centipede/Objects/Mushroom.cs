@@ -8,13 +8,13 @@ namespace CS5410.Objects
     public class Mushroom
     {
         public int state = 0;
-        public bool isPoisoned = false;
         private Rectangle boundary;
 
         public Mushroom(Vector2 size, Vector2 center)
         {
             Size = size;
             Center = center;
+            Poison = false;
             boundary = new Rectangle(
                 (int) (center.X - size.X / 2),
                 (int) (center.Y - size.Y / 2),
@@ -23,6 +23,7 @@ namespace CS5410.Objects
             );
         }
         
+        public bool Poison { get; set; }
         public Vector2 Center { get; set; }
         public Vector2 Size { get; set; }
 

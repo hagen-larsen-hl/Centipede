@@ -6,17 +6,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b9002f50-4518-454e-84a7-29ee3188c448" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/centipede/Content/GameStateViews/GamePlayView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/Centipede.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Centipede.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Centipede/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Centipede/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/centipede/Content/Content.mgcb" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/Content.mgcb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/ControlsView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/GameStateViews/ControlsView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/CreditsView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/GameStateViews/CreditsView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/GamePlayView.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/GameStateEnum.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/GameStateViews/GameStateEnum.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/GameStateView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/GameStateViews/GameStateView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/HighScoresView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/GameStateViews/HighScoresView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/IGameState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/GameStateViews/IGameState.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/MainMenuView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/GameStateViews/MainMenuView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/Content/SpriteSheets/flea.png" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/SpriteSheets/flea.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/Content/SpriteSheets/head.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/Content/SpriteSheets/mushroom.png" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/SpriteSheets/mushroom.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/Content/SpriteSheets/player.png" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/SpriteSheets/player.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/ControlsView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/ControlsView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/CreditsView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/CreditsView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/GamePlayView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/GamePlayView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/HighScoresView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/HighScoresView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/MainMenuView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/MainMenuView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/Objects/CentipedeSegment.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Objects/CentipedeSegment.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/Objects/Mushroom.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Objects/Mushroom.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/Renderers/CentipedeRenderer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Renderers/CentipedeRenderer.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,6 +37,7 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$USER_HOME$/Downloads/ClientSide Persistence - Simple/ClientSide Persistence - Simple/SimplePersistence.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/Downloads/Rendering - Animated Sprites/Rendering - Animated Sprites/AnimatedSprite.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ef0f4f575d6c4c21bfc710db8f2f75c618b800/de/1534e788/SpriteBatch.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/Downloads/Rendering - Animated Sprites/Rendering - Animated Sprites/Objects/AnimatedSprite.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/Downloads/Rendering - Animated Sprites/Rendering - Animated Sprites/Objects/Bird.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/Downloads/GameState - Menus 3/GameState - Menus/Program.cs" root0="SKIP_HIGHLIGHTING" />
@@ -118,7 +122,9 @@
       <workItem from="1646613404002" duration="682000" />
       <workItem from="1646614778141" duration="735000" />
       <workItem from="1646615554107" duration="56369000" />
-      <workItem from="1647106245299" duration="30769000" />
+      <workItem from="1647106245299" duration="39838000" />
+      <workItem from="1647717674542" duration="24562000" />
+      <workItem from="1647913476993" duration="10726000" />
     </task>
     <servers />
   </component>
@@ -151,6 +157,19 @@
           </properties>
           <option name="timeStamp" value="4" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/centipede/GameStateViews/GamePlayView.cs</url>
+          <line>208</line>
+          <properties documentPath="$PROJECT_DIR$/centipede/GameStateViews/GamePlayView.cs" initialLine="183" containingFunctionPresentation="lambda expression inside method 'finalizeSaveAsync'">
+            <startOffsets>
+              <option value="7578" />
+            </startOffsets>
+            <endOffsets>
+              <option value="7644" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

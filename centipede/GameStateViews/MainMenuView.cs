@@ -27,10 +27,6 @@ namespace CS5410
 
         private MenuState m_currentSelection = MenuState.NewGame;
         private GameStateEnum m_currentView = GameStateEnum.MainMenu;
-        private bool m_waitForKeyRelease = false;
-        private bool saving;
-        private bool loading;
-        private Objects.Controls m_keyboardLayout;
         
         public override void initialize(GraphicsDevice graphicsDevice, GraphicsDeviceManager graphics)
         {
@@ -107,10 +103,10 @@ namespace CS5410
                 m_currentSelection == MenuState.NewGame ? m_fontMenuSelect : m_fontMenu, 
                 "New Game",
                 200, 
-                m_currentSelection == MenuState.NewGame ? Color.LimeGreen : Color.SkyBlue);
-            bottom = drawMenuItem(m_currentSelection == MenuState.HighScores ? m_fontMenuSelect : m_fontMenu, "High Scores", bottom, m_currentSelection == MenuState.HighScores ? Color.LimeGreen : Color.SkyBlue);
-            bottom = drawMenuItem(m_currentSelection == MenuState.Help ? m_fontMenuSelect : m_fontMenu, "Help", bottom, m_currentSelection == MenuState.Help ? Color.LimeGreen : Color.SkyBlue);
-            bottom = drawMenuItem(m_currentSelection == MenuState.About ? m_fontMenuSelect : m_fontMenu, "About", bottom, m_currentSelection == MenuState.About ? Color.LimeGreen : Color.SkyBlue);
+                m_currentSelection == MenuState.NewGame ? Color.SkyBlue : Color.Blue);
+            bottom = drawMenuItem(m_currentSelection == MenuState.HighScores ? m_fontMenuSelect : m_fontMenu, "High Scores", bottom, m_currentSelection == MenuState.HighScores ? Color.SkyBlue : Color.Blue);
+            bottom = drawMenuItem(m_currentSelection == MenuState.Help ? m_fontMenuSelect : m_fontMenu, "Help", bottom, m_currentSelection == MenuState.Help ? Color.SkyBlue : Color.Blue);
+            bottom = drawMenuItem(m_currentSelection == MenuState.About ? m_fontMenuSelect : m_fontMenu, "About", bottom, m_currentSelection == MenuState.About ? Color.SkyBlue : Color.Blue);
             drawMenuItem(m_currentSelection == MenuState.Quit ? m_fontMenuSelect : m_fontMenu, "Quit", bottom, m_currentSelection == MenuState.Quit ? Color.Red : Color.DarkRed);
 
             m_spriteBatch.End();

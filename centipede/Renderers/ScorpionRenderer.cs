@@ -5,11 +5,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CS5410.Renderers
 {
-    public class CentipedeRenderer
+    public class ScorpionRenderer
     {
         private SpriteBatch m_spriteBatch;
 
-        public CentipedeRenderer(SpriteBatch spriteBatch)
+        public ScorpionRenderer(SpriteBatch spriteBatch)
         {
             m_spriteBatch = spriteBatch;
         }
@@ -19,21 +19,24 @@ namespace CS5410.Renderers
             
         }
         
-        public void Render(CentipedeSegment centipede, Texture2D spriteSheet, int spriteCount)
+        public void Render(Scorpion scorpion, Texture2D spriteSheet, int spriteCount)
         {
             m_spriteBatch.Draw(
                 spriteSheet,
-                centipede.Boundary,
+                scorpion.Boundary,
                 new Rectangle(
-                    (spriteSheet.Width / spriteCount) * centipede.State, 
+                    (spriteSheet.Width / spriteCount) * scorpion.State,
                     0,
                     spriteSheet.Width / spriteCount,
                     spriteSheet.Height
                 ),
-                Color.White, 
+                Color.White,
                 0,
-                 new Vector2(0, 0),
-                SpriteEffects.FlipHorizontally,
+                new Vector2(
+                    0, 
+                    0
+                ),
+                SpriteEffects.None,
                 0);
         }
     }

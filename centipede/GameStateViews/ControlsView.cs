@@ -69,13 +69,12 @@ namespace CS5410
                 if (!this.saving)
                 {
                     this.saving = true;
-                    //
-                    finalizeSaveAsync(layout);
+                    saveLayoutAsync(layout);
                 }
             }
         }
         
-        private async void finalizeSaveAsync(Objects.Controls layout)
+        private async void saveLayoutAsync(Objects.Controls layout)
         {
             await Task.Run(() =>
             {
@@ -83,7 +82,7 @@ namespace CS5410
                 {
                     try
                     {
-                        using (IsolatedStorageFileStream fs = storage.OpenFile("layout.xml", FileMode.OpenOrCreate))
+                        using (IsolatedStorageFileStream fs = storage.OpenFile("layout.xml", FileMode.Create))
                         {
                             if (fs != null)
                             {
@@ -110,13 +109,13 @@ namespace CS5410
                 {
                     this.loading = true;
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    finalizeLoadAsync();
+                    loadLayoutAsync();
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
             }
         }
 
-        private async Task finalizeLoadAsync()
+        private async Task loadLayoutAsync()
         {
             await Task.Run(() =>
             {
@@ -229,7 +228,7 @@ namespace CS5410
             m_spriteBatch.Begin();
 
             m_spriteBatch.DrawString(m_font, "CONTROLS",
-                new Vector2(m_graphics.PreferredBackBufferWidth / 10, m_graphics.PreferredBackBufferHeight / 10), Color.White);
+                new Vector2(m_graphics.PreferredBackBufferWidth / 2 - m_font.MeasureString("CONTROLS").X / 2, m_graphics.PreferredBackBufferHeight / 8), Color.White);
             
             if (awaitKey)
             {
@@ -238,12 +237,12 @@ namespace CS5410
             }
             else
             {
-                float bottom = 200;
-                bottom = drawMenuItem(m_font,"Move Up: " + m_keyboardLayout.Up, bottom, m_currentSelection == Selection.Up ? Color.Yellow : Color.Blue);
-                bottom = drawMenuItem(m_font, "Move Down: " + m_keyboardLayout.Down, bottom, m_currentSelection == Selection.Down ? Color.Yellow : Color.Blue);
-                bottom = drawMenuItem(m_font, "Move Right: " + m_keyboardLayout.Right, bottom, m_currentSelection == Selection.Right ? Color.Yellow : Color.Blue);
-                bottom = drawMenuItem(m_font, "Move Left: " + m_keyboardLayout.Left, bottom, m_currentSelection == Selection.Left ? Color.Yellow : Color.Blue);
-                drawMenuItem(m_font, "Fire: " + m_keyboardLayout.Fire, bottom, m_currentSelection == Selection.Fire ? Color.Yellow : Color.Blue);
+                float bottom = (float) (m_graphics.PreferredBackBufferHeight * 0.2);
+                bottom = drawMenuItem(m_font,"Move Up: " + m_keyboardLayout.Up, bottom, m_currentSelection == Selection.Up ? Color.SkyBlue : Color.Blue);
+                bottom = drawMenuItem(m_font, "Move Down: " + m_keyboardLayout.Down, bottom, m_currentSelection == Selection.Down ? Color.SkyBlue : Color.Blue);
+                bottom = drawMenuItem(m_font, "Move Right: " + m_keyboardLayout.Right, bottom, m_currentSelection == Selection.Right ? Color.SkyBlue : Color.Blue);
+                bottom = drawMenuItem(m_font, "Move Left: " + m_keyboardLayout.Left, bottom, m_currentSelection == Selection.Left ? Color.SkyBlue : Color.Blue);
+                drawMenuItem(m_font, "Fire: " + m_keyboardLayout.Fire, bottom, m_currentSelection == Selection.Fire ? Color.SkyBlue : Color.Blue);
 
             }
             m_spriteBatch.End();

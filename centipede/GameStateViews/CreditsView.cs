@@ -35,11 +35,27 @@ namespace CS5410
         {
             m_spriteBatch.Begin();
 
-            Vector2 stringSize = m_font.MeasureString(MESSAGE);
-            m_spriteBatch.DrawString(m_font, MESSAGE,
-                new Vector2(m_graphics.PreferredBackBufferWidth / 2 - stringSize.X / 2, m_graphics.PreferredBackBufferHeight / 2 - stringSize.Y), Color.Yellow);
-
+            m_spriteBatch.DrawString(m_font, "CREDITS",
+                new Vector2(m_graphics.PreferredBackBufferWidth / 2 - m_font.MeasureString("CREDITS").X / 2, m_graphics.PreferredBackBufferHeight / 8), Color.White);
+            
+            float bottom = (float) (m_graphics.PreferredBackBufferHeight * 0.2);
+            bottom = drawMenuItem(m_font,"Gameplay: Hagen Larsen", bottom, Color.Blue);
+            bottom = drawMenuItem(m_font, "Sprites: Spriters Resource", bottom, Color.Blue);
+            bottom = drawMenuItem(m_font, "Sound: Various Artists", bottom, Color.Blue);
+            
             m_spriteBatch.End();
+        }
+        
+        private float drawMenuItem(SpriteFont font, string text, float y, Color color)
+        {
+            Vector2 stringSize = font.MeasureString(text);
+            m_spriteBatch.DrawString(
+                font,
+                text,
+                new Vector2(m_graphics.PreferredBackBufferWidth / 2 - stringSize.X / 2, y),
+                color);
+
+            return y + stringSize.Y;
         }
 
         public override void update(GameTime gameTime)

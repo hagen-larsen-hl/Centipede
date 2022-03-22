@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.IsolatedStorage;
+using System.Net;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using centipede.Content.Input;
@@ -17,6 +18,11 @@ namespace CS5410
 {
     public class GamePlayView : GameStateView
     {
+        // Enemy Frequencies
+        private int fleaFrequency = 100;
+        private int spiderFrequency = 100;
+        private int scorpionFrequency = 100;
+        
         // Arena Related Variables
         private int yMargin;
         private int xMargin;
@@ -35,6 +41,8 @@ namespace CS5410
         private PlayerRenderer m_playerRenderer;
         private BulletRenderer m_bulletRenderer;
         private FleaRenderer m_fleaRenderer;
+        private ScorpionRenderer m_scorpionRenderer;
+        private SpiderRenderer m_spiderRenderer;
         private CentipedeRenderer m_centipedeRenderer;
         
         // Rendering Components
@@ -45,17 +53,29 @@ namespace CS5410
         private Texture2D m_bulletSprite;
         private Texture2D m_fleaSpriteSheet;
         private Texture2D m_centipedeHeadSpriteSheet;
+        private Texture2D m_centipedeBodySpriteSheet;
+        private Texture2D m_scorpionSpriteSheet;
+        private Texture2D m_spiderSpriteSheet;
         
         // Data Structures
         private List<Mushroom> mushrooms;
         private List<Bullet> bullets;
         private Player player;
         private Flea flea;
+        private Scorpion scorpion;
+        private Spider spider;
         private List<CentipedeSegment> centipedeSegments;
         private bool gameOver;
+        private List<int> scores;
+
+        // Timers
+        private TimeSpan fleaTimer;
+        private TimeSpan spiderTimer;
+        private TimeSpan scorpionTimer;
 
         // Technical Variables
         private bool loading;
+        private bool saving;
         private Objects.Controls m_keyboardLayout;
         private KeyboardInput m_inputHandler = new KeyboardInput();
         private GameStateEnum m_gameState;
@@ -71,13 +91,24 @@ namespace CS5410
             initializePlayer(3, 0);
             totalGameTime = TimeSpan.Zero;
             initializeCentipede();
+            flea = null;
+            spider = null;
+            scorpion = null;
             gameOver = false;
+            scores = new List<int>() {0, 0, 0, 0, 0};
+
+            // Initialize Timers
+            fleaTimer = TimeSpan.FromSeconds(fleaFrequency);
+            spiderTimer = TimeSpan.FromSeconds(spiderFrequency);
+            scorpionTimer = TimeSpan.FromSeconds(scorpionFrequency);
             
             // Renderer Configuration
             m_mushroomRenderer = new MushroomRenderer(m_spriteBatch);
             m_playerRenderer = new PlayerRenderer(m_spriteBatch);
             m_bulletRenderer = new BulletRenderer(m_spriteBatch);
             m_fleaRenderer = new FleaRenderer(m_spriteBatch);
+            m_scorpionRenderer = new ScorpionRenderer(m_spriteBatch);
+            m_spiderRenderer = new SpiderRenderer(m_spriteBatch);
             m_centipedeRenderer = new CentipedeRenderer(m_spriteBatch);
             
             // Arena Configuration
@@ -94,11 +125,12 @@ namespace CS5410
 
             // Load From Persistent Local Storage
             loadLayout();
+            loadScores();
         }
 
         public void placeMushrooms(Random rand) 
         {
-            for (int i = (rows - (rows - 3)); i <= rows / 10 * 8; i++)
+            for (int i = (rows - (rows - 3)); i <= rows - 6; i++)
             {
                 for (int j = 0; j <= columns - 1; j++)
                 {
@@ -132,24 +164,61 @@ namespace CS5410
         public void initializeCentipede()
         {
             centipedeSegments = new List<CentipedeSegment>();
-            double descend = (3 * rowHeight) + rowHeight / 2;
-            int y = -50;
+            int x = (gameRight - gameLeft) / 2;
             for (int i = 0; i < 8; i++)
             {
                 CentipedeSegment centipede = new CentipedeSegment(
                     null, null,
                     new Vector2(
-                        (gameRight - gameLeft) / 2,
-                        y),
+                        x,
+                        gameTop + yMargin + rowHeight * 2),
                     new Vector2(
                         columnWidth,
                         rowHeight),
                     new int[] {25, 25, 25, 25, 25, 25, 25, 25},
-                    descend + yMargin);
-                descend += centipede.Size.Y;
-                y -= (int) centipede.Size.Y;
+                    0);
+                x -= (int) centipede.Size.X;
                 centipedeSegments.Add(centipede);
             }
+        }
+        
+        private void saveScore(List<int> scores)
+        {
+            lock (this)
+            {
+                if (!this.saving)
+                {
+                    this.saving = true;
+                    finalizeSaveAsync(scores);
+                }
+            }
+        }
+        
+        private async void finalizeSaveAsync(List<int> scores)
+        {
+            await Task.Run(() =>
+            {
+                using (IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    try
+                    {
+                        using (IsolatedStorageFileStream fs = storage.OpenFile("scores.xml", FileMode.OpenOrCreate))
+                        {
+                            if (fs != null)
+                            {
+                                XmlSerializer mySerializer = new XmlSerializer(typeof(List<int>));
+                                mySerializer.Serialize(fs, scores);
+                            }
+                        }
+                    }
+                    catch (IsolatedStorageException)
+                    {
+                        // Ideally show something to the user, but this is demo code :)
+                    }
+                }
+
+                this.saving = false;
+            });
         }
         
         private void loadLayout()
@@ -160,13 +229,13 @@ namespace CS5410
                 {
                     this.loading = true;
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    finalizeLoadAsync();
+                    loadLayoutAsync();
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
             }
         }
 
-        private async Task finalizeLoadAsync()
+        private async Task loadLayoutAsync()
         {
             await Task.Run(() =>
             {
@@ -200,6 +269,17 @@ namespace CS5410
                             m_keyboardLayout.Right = Keys.Right;
                             m_keyboardLayout.Fire = Keys.Space;
                         }
+                        if (storage.FileExists("scores.xml"))
+                        {
+                            using (IsolatedStorageFileStream fs = storage.OpenFile("scores.xml", FileMode.Open))
+                            {
+                                if (fs != null)
+                                {
+                                    XmlSerializer mySerializer = new XmlSerializer(typeof(List<int>));
+                                    scores = (List<int>)mySerializer.Deserialize(fs);
+                                }
+                            }
+                        }
                     }
                     catch (IsolatedStorageException)
                     {
@@ -211,6 +291,49 @@ namespace CS5410
             });
         }
         
+        private void loadScores()
+        {
+            lock (this)
+            {
+                if (!this.loading)
+                {
+                    this.loading = true;
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    loadScoresAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                }
+            }
+        }
+
+        private async Task loadScoresAsync()
+        {
+            await Task.Run(() =>
+            {
+                using (IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    try
+                    {
+                        if (storage.FileExists("scores.xml"))
+                        {
+                            using (IsolatedStorageFileStream fs = storage.OpenFile("scores.xml", FileMode.Open))
+                            {
+                                if (fs != null)
+                                {
+                                    XmlSerializer mySerializer = new XmlSerializer(typeof(List<int>));
+                                    scores = (List<int>)mySerializer.Deserialize(fs);
+                                }
+                            }
+                        }
+                    }
+                    catch (IsolatedStorageException)
+                    {
+                        // Ideally show something to the user, but this is demo code :)
+                    }
+                }
+                this.loading = false;
+            });
+        }
+        
         public override void loadContent(ContentManager contentManager)
         {
             m_font = contentManager.Load<SpriteFont>("Fonts/menu");
@@ -218,8 +341,11 @@ namespace CS5410
             m_playerSprite = contentManager.Load<Texture2D>("SpriteSheets/player");
             m_bulletSprite = contentManager.Load<Texture2D>("SpriteSheets/bullet");
             m_fleaSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/flea");
-            m_centipedeHeadSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/head");
-            // m_poisonMushroomSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/poisonMushroom");
+            m_centipedeHeadSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/centipedeHead");
+            m_poisonMushroomSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/poisonMushroom");
+            m_centipedeBodySpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/centipedeBody");
+            m_spiderSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/spider");
+            m_scorpionSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/scorpion");
         }
 
         public override GameStateEnum processInput(GameTime gameTime)
@@ -236,8 +362,13 @@ namespace CS5410
                 return;
             }
             totalGameTime += gameTime.ElapsedGameTime;
+            fleaTimer -= gameTime.ElapsedGameTime;
+            spiderTimer -= gameTime.ElapsedGameTime;
+            scorpionTimer -= gameTime.ElapsedGameTime;
             updateBullets(gameTime);
             updateFlea(gameTime);
+            updateScorpion(gameTime);
+            updateSpider(gameTime);
             updateCentipede(gameTime);
         }
 
@@ -295,6 +426,22 @@ namespace CS5410
                     player.Score += 200;
                     bulletsToRemove.Add(bullet);
                 }
+                
+                // Check if hit scorpion
+                if (scorpion != null && bullet.Boundary.Intersects(scorpion.Boundary))
+                {
+                    scorpion = null;
+                    player.Score += 1000;
+                    bulletsToRemove.Add(bullet);
+                }
+                
+                // Check if hit spider
+                if (spider != null && bullet.Boundary.Intersects(spider.Boundary))
+                {
+                    spider = null;
+                    player.Score += 500;
+                    bulletsToRemove.Add(bullet);
+                }
 
                 if (bullet.Position.Y < 0)
                 {
@@ -321,12 +468,18 @@ namespace CS5410
             {
                 mushrooms.Add(mushroom);
             }
+
+            if (centipedeSegments.Count == 0)
+            {
+                initializeCentipede();
+            }
         }
 
         private void updateFlea(GameTime gameTime)
         {
-            if (mushrooms.Count < 20 && flea == null)
+            if (fleaTimer.TotalSeconds <= 0 && flea == null)
             {
+                fleaTimer = TimeSpan.FromSeconds(fleaFrequency);
                 Random rand = new Random();
                 int x = rand.Next(0, columns);
                 flea = new Flea(
@@ -383,23 +536,164 @@ namespace CS5410
                 }
                 
                 // Check if hit player
-                if (flea.Boundary.Intersects(player.Boundary))
-                {
-                    if (player.lives == 1)
-                    {
-                        gameOver = true;
-                    }
-                    else
-                    {
-                        flea = null;
-                        initializePlayer(player.lives - 1, player.Score);
-                    }
-                }
+                checkPlayerCollision(flea.Boundary);
 
                 // Remove flea if at bottom of screen
                 if (flea != null && flea.Center.Y > gameBottom)
                 {
                     flea = null;
+                }
+            }
+        }
+        
+        private void updateScorpion(GameTime gameTime)
+        {
+            if (scorpionTimer.TotalSeconds <= 0 && scorpion == null)
+            {
+                scorpionTimer = TimeSpan.FromSeconds(scorpionFrequency);
+                Random rand = new Random();
+                int y = rand.Next(2, (int) (rows * 0.7));
+                scorpion = new Scorpion(
+                    new Vector2(
+                        0, 
+                        (float) (yMargin + rowHeight * y)), 
+                    new Vector2(
+                        columnWidth, 
+                        rowHeight),
+                    new int[] { 70, 70, 70, 70 }
+                    );
+            }
+
+            if (scorpion != null)
+            {
+                // Move Scorpion
+                scorpion.setPosition(new Vector2(
+                    scorpion.Center.X + (gameTime.ElapsedGameTime.Milliseconds * scorpion.Speed),
+                    scorpion.Center.Y ));
+
+                // Update Sprite
+                scorpion.AnimationTime += gameTime.ElapsedGameTime;
+                if (scorpion.AnimationTime.TotalMilliseconds >= scorpion.SpriteTime[scorpion.State])
+                {
+                    scorpion.AnimationTime -= TimeSpan.FromMilliseconds(scorpion.SpriteTime[scorpion.State]);
+                    scorpion.State++;
+                    scorpion.State = scorpion.State % scorpion.SpriteTime.Length;
+                }
+
+                // Check if hit player
+                checkPlayerCollision(scorpion.Boundary);
+                
+                // Check if poisoned mushroom
+                foreach (Mushroom mushroom in mushrooms)
+                {
+                    if (scorpion.Boundary.Intersects(mushroom.getBoundary()))
+                    {
+                        mushroom.Poison = true;
+                    }
+                }
+
+                // Remove scorpion if at right of screen
+                if (scorpion != null && scorpion.Center.X > gameRight)
+                {
+                    scorpion = null;
+                }
+            }
+        }
+        
+        private void updateSpider(GameTime gameTime)
+        {
+            if (spiderTimer.TotalSeconds <= 0 && spider == null)
+            {
+                spiderTimer = TimeSpan.FromSeconds(spiderFrequency);
+                Random rand = new Random();
+                bool down = false;
+                float x = (gameRight);
+                bool right = false;
+                if (rand.Next(0, 2) == 0)
+                {
+                    down = true;
+                    
+                }
+
+                if (rand.Next(0, 2) == 1)
+                {
+                    x = gameLeft;
+                    right = true;
+                }
+                spider = new Spider(
+                    new Vector2(
+                        x, 
+                        (float) (rows * 0.7 * rowHeight)), 
+                    new Vector2(
+                        columnWidth, 
+                        rowHeight),
+                    new int[] { 70, 70, 70, 70 },
+                    down,
+                    right
+                    );
+            }
+
+            if (spider != null)
+            {
+                // Move Spider
+                if (spider.Down)
+                {
+                    if (spider.Right)
+                    {
+                        spider.setPosition(new Vector2(
+                            spider.Center.X + (gameTime.ElapsedGameTime.Milliseconds * spider.Speed),
+                            spider.Center.Y + (gameTime.ElapsedGameTime.Milliseconds * spider.Speed)));
+                    }
+                    else
+                    {
+                        spider.setPosition(new Vector2(
+                            spider.Center.X - (gameTime.ElapsedGameTime.Milliseconds * spider.Speed),
+                            spider.Center.Y + (gameTime.ElapsedGameTime.Milliseconds * spider.Speed)));
+                    }
+                }
+                else
+                {
+                    if (spider.Right)
+                    {
+                        spider.setPosition(new Vector2(
+                            spider.Center.X + (gameTime.ElapsedGameTime.Milliseconds * spider.Speed),
+                            spider.Center.Y - (gameTime.ElapsedGameTime.Milliseconds * spider.Speed)));
+                    }
+                    else
+                    {
+                        spider.setPosition(new Vector2(
+                            spider.Center.X - (gameTime.ElapsedGameTime.Milliseconds * spider.Speed),
+                            spider.Center.Y - (gameTime.ElapsedGameTime.Milliseconds * spider.Speed)));
+                    }
+                }
+
+                // Update Sprite
+                spider.AnimationTime += gameTime.ElapsedGameTime;
+                if (spider.AnimationTime.TotalMilliseconds >= spider.SpriteTime[spider.State])
+                {
+                    spider.AnimationTime -= TimeSpan.FromMilliseconds(spider.SpriteTime[spider.State]);
+                    spider.State++;
+                    spider.State = spider.State % spider.SpriteTime.Length;
+                }
+                
+                // Check if hit player
+                checkPlayerCollision(spider.Boundary);
+
+                // Bounce Spider Off Top and Bottom Boundary
+                if (spider.Center.Y > rows * 0.9 * rowHeight)
+                {
+                    spider.Down = false;
+                }
+                else if (spider.Center.Y < rows * 0.6 * rowHeight)
+                {
+                    spider.Down = true;
+                }
+                
+                // Remove Spider if at Boundary
+                if (spider.Center.X > gameRight || 
+                    spider.Center.X < gameLeft)
+                {
+                    spider = null;
                 }
             }
         }
@@ -423,6 +717,12 @@ namespace CS5410
                     newPos = new Vector2(
                         centipede.Center.X,
                         (float) (centipede.Center.Y + elapsedDistance));
+                }
+                else if (centipede.Direction == CentipedeSegment.DirectionEnum.up)
+                {
+                    newPos = new Vector2(
+                        centipede.Center.X,
+                        (float) (centipede.Center.Y - elapsedDistance));
                 }
                 else
                 {
@@ -449,17 +749,7 @@ namespace CS5410
                 }
                 
                 // Check if hit player
-                if (centipede.Boundary.Intersects(player.Boundary))
-                {
-                    if (player.lives == 1)
-                    {
-                        gameOver = true;
-                    }
-                    else
-                    {
-                        initializePlayer(player.lives - 1, player.Score);
-                    }
-                }
+                checkPlayerCollision(centipede.Boundary);
             }
         }
 
@@ -467,22 +757,35 @@ namespace CS5410
         {
             Vector2 newPos = position;
             float rotation = centipede.Rotation;
+            bool newDescend = false;
             double toDescend = centipede.ToDescend;
             double elapsedDistance = distance;
             CentipedeSegment.DirectionEnum direction = centipede.Direction;
+            CentipedeSegment.DirectionEnum newTarget = centipede.Target;
 
             bool collisionDown = false;
             bool collisionRight = false;
             bool collisionLeft = false;
+            bool collisionUp = false;
             
             // Check collisions
             foreach (Mushroom mushroom in mushrooms)
             {
                 if (newBoundary.Intersects(mushroom.getBoundary()))
                 {
+                    if (mushroom.Poison)
+                    {
+                        direction = CentipedeSegment.DirectionEnum.down;
+                        newDescend = true;
+                        toDescend = gameBottom - centipede.Center.Y;
+                    }
                     if (centipede.Direction == CentipedeSegment.DirectionEnum.down)
                     {
                         collisionDown = true;
+                    }
+                    else if (centipede.Direction == CentipedeSegment.DirectionEnum.up)
+                    {
+                        collisionUp = true;
                     }
                     else if (centipede.Direction == CentipedeSegment.DirectionEnum.right)
                     {
@@ -506,6 +809,13 @@ namespace CS5410
             else if (newBoundary.Bottom > gameBottom)
             {
                 collisionDown = true;
+                newTarget = CentipedeSegment.DirectionEnum.up;
+            }
+            
+            else if (newBoundary.Bottom < gameTop + rowHeight * 2)
+            {
+                collisionUp = true;
+                newTarget = CentipedeSegment.DirectionEnum.down;
             }
 
             if (collisionDown)
@@ -529,26 +839,67 @@ namespace CS5410
                 }
                 rotation = (float) Math.PI;
             }
+            else if (collisionUp)
+            {
+                if (centipede.LastDirection == CentipedeSegment.DirectionEnum.left)
+                {
+                    direction = CentipedeSegment.DirectionEnum.right;
+                    newPos = new Vector2(
+                        (float) (centipede.Center.X + elapsedDistance),
+                        (float) (centipede.Center.Y));
+                    centipede.LastDirection = CentipedeSegment.DirectionEnum.right;
+
+                }
+                else
+                {
+                    direction = CentipedeSegment.DirectionEnum.left;
+                    newPos = new Vector2(
+                        (float) (centipede.Center.X - elapsedDistance),
+                        (float) (centipede.Center.Y));
+                    centipede.LastDirection = CentipedeSegment.DirectionEnum.left;
+                }
+                rotation = (float) Math.PI;
+            }
+            
             else if (collisionRight)
             {
                 centipede.LastDirection = CentipedeSegment.DirectionEnum.right;
                 rotation = (float) (3 * Math.PI / 2);
-                direction = CentipedeSegment.DirectionEnum.down;
+                direction = centipede.Target;
                 centipede.ToDescend = centipede.Size.Y;
-                newPos = new Vector2(
-                    centipede.Center.X,
-                    (float) (centipede.Center.Y + elapsedDistance));
+                if (centipede.Target == CentipedeSegment.DirectionEnum.down)
+                {
+                    newPos = new Vector2(
+                        centipede.Center.X,
+                        (float) (centipede.Center.Y + elapsedDistance));
+                }
+                else
+                {
+                    newPos = new Vector2(
+                        centipede.Center.X,
+                        (float) (centipede.Center.Y - elapsedDistance));
+                }
             }
             else if (collisionLeft)
             {
                 centipede.LastDirection = CentipedeSegment.DirectionEnum.left;
                 rotation = (float) (3 * Math.PI / 2);
-                direction = CentipedeSegment.DirectionEnum.down;
+                direction = centipede.Target;
                 centipede.ToDescend = centipede.Size.Y;
-                newPos = new Vector2(
-                    centipede.Center.X,
-                    (float) (centipede.Center.Y +
-                             centipede.Speed * elapsedDistance));
+                if (centipede.Target == CentipedeSegment.DirectionEnum.down)
+                {
+                    newPos = new Vector2(
+                        centipede.Center.X,
+                        (float) (centipede.Center.Y +
+                                 centipede.Speed * elapsedDistance));
+                }
+                else
+                {
+                    newPos = new Vector2(
+                        centipede.Center.X,
+                        (float) (centipede.Center.Y -
+                                 centipede.Speed * elapsedDistance));
+                }
             }
             else
             {
@@ -581,10 +932,69 @@ namespace CS5410
                         }
                     }
                 }
+                else if (centipede.Direction == CentipedeSegment.DirectionEnum.up)
+                {
+                    if (centipede.ToDescend > 0)
+                    {
+                        if (elapsedDistance > centipede.ToDescend)
+                        {
+                            elapsedDistance -= centipede.ToDescend;
+                            if (centipede.LastDirection == CentipedeSegment.DirectionEnum.right)
+                            {
+                                direction = CentipedeSegment.DirectionEnum.left;
+                                newPos = new Vector2(
+                                    (float) (centipede.Center.X - elapsedDistance),
+                                    (float) (centipede.Center.Y - centipede.ToDescend));
+                            }
+                            else
+                            {
+                                direction = CentipedeSegment.DirectionEnum.right;
+                                newPos = new Vector2(
+                                    (float) (centipede.Center.X + elapsedDistance),
+                                    (float) (centipede.Center.Y - centipede.ToDescend));
+                            }
+                            centipede.ToDescend = 0;
+                        }
+                        else
+                        {
+                            centipede.ToDescend -= elapsedDistance;
+                        }
+                    }
+                }
+            }
+
+            if (newDescend)
+            {
+                centipede.ToDescend = toDescend;
             }
             centipede.Rotation = rotation;
             centipede.Direction = direction;
             centipede.setPosition(newPos);
+            centipede.Target = newTarget;
+        }
+
+        private void checkPlayerCollision(Rectangle boundary)
+        {
+            if (boundary.Intersects(player.Boundary))
+            {
+                if (player.lives == 1)
+                {
+                    foreach (int score in scores)
+                    {
+                        if (player.Score > score)
+                        {
+                            scores.Insert(scores.IndexOf(score), player.Score);
+                            saveScore(scores);
+                            break;
+                        }
+                    }
+                    gameOver = true;
+                }
+                else
+                {
+                    initializePlayer(player.lives - 1, player.Score);
+                }
+            }
         }
 
         public override void render(GameTime gameTime)
@@ -602,6 +1012,8 @@ namespace CS5410
             renderBullets();
             renderPlayer();
             renderFlea();
+            renderScorpion();
+            renderSpider();
             renderCentipede();
 
             m_spriteBatch.End();
@@ -621,30 +1033,57 @@ namespace CS5410
 
         private void renderGameOver(int score)
         {
-            float bottom = (float) (m_graphics.PreferredBackBufferHeight * 0.3);
-            bottom = drawMenuItem(m_font, "Final Score: ", bottom, Color.SkyBlue);
-            bottom = drawMenuItem(m_font, player.Score.ToString(), bottom, Color.LimeGreen);
+            float bottom = (float) (m_graphics.PreferredBackBufferHeight * 0.2);
+            bottom = drawMenuItem(m_font, "GAME OVER", bottom, Color.DarkRed);
+            bottom = drawMenuItem(m_font, " ", bottom, Color.Aqua);
+            bottom = drawMenuItem(m_font, "Final Score:", bottom, Color.SkyBlue);
+            bottom = drawMenuItem(m_font, score.ToString(), bottom, Color.SkyBlue);
         }
 
         private void renderTopBar( )
         {
-            Vector2 stringSize = m_font.MeasureString("High Scores and Lives Here");
-            
             m_spriteBatch.DrawString(m_font, "Time: " + totalGameTime.Minutes + ":" + totalGameTime.Seconds,
                 new Vector2(gameLeft, gameTop), Color.White);
             
             m_spriteBatch.DrawString(m_font, "Score: " + player.Score,
                 new Vector2((gameRight / 2) - (m_font.MeasureString("Score: XXXX").X / 2), gameTop), Color.White);
             
-            m_spriteBatch.DrawString(m_font, "Lives: " + player.lives,
-                new Vector2(gameRight - m_font.MeasureString("Lives: X").X, gameTop), Color.White);
+            m_spriteBatch.DrawString(m_font, "Lives: ",
+                new Vector2(gameRight - m_font.MeasureString("Lives: ").X - (3 * player.Size.X), gameTop), Color.White);
+
+            int x = (int) (gameRight - (3 * player.Size.X));
+            for (int i = 0; i < player.lives; i++)
+            {
+                m_spriteBatch.Draw(
+                    m_playerSprite,
+                    new Rectangle(
+                        x, 
+                        (int) (gameTop + m_font.MeasureString("Lives: ").Y / 10), 
+                        (int) player.Size.X,
+                        (int) player.Size.Y),
+                    null,
+                    Color.White,
+                    0,
+                    new Vector2(0, 0),
+                    SpriteEffects.None,
+                    0
+                );
+                x += (int) player.Size.X;
+            }
         }
 
         private void renderMushrooms()
         {
             foreach (Mushroom mushroom in mushrooms)
             {
-                m_mushroomRenderer.Render(mushroom, m_mushroomSpriteSheet, 4);
+                if (mushroom.Poison)
+                {
+                    m_mushroomRenderer.Render(mushroom, m_poisonMushroomSpriteSheet, 4);
+                }
+                else
+                {
+                    m_mushroomRenderer.Render(mushroom, m_mushroomSpriteSheet, 4);
+                }
             }
         }
 
@@ -668,12 +1107,37 @@ namespace CS5410
                 m_fleaRenderer.Render(flea, m_fleaSpriteSheet, 4);
             }
         }
+        
+        private void renderScorpion()
+        {
+            if (scorpion != null)
+            {
+                m_scorpionRenderer.Render(scorpion, m_scorpionSpriteSheet, 4);
+            }
+        }
+        
+        private void renderSpider()
+        {
+            if (spider != null)
+            {
+                m_spiderRenderer.Render(spider, m_spiderSpriteSheet, 4);
+            }
+        }
 
         private void renderCentipede()
         {
+            int segment = 0;
             foreach (CentipedeSegment centipede in centipedeSegments)
             {
-                m_centipedeRenderer.RenderHead(centipede, m_centipedeHeadSpriteSheet, 8);
+                if (segment == 0)
+                {
+                    m_centipedeRenderer.Render(centipede, m_centipedeHeadSpriteSheet, 8);
+                }
+                else
+                {
+                    m_centipedeRenderer.Render(centipede, m_centipedeBodySpriteSheet, 8);
+                }
+                segment++;
             }
         }
 
