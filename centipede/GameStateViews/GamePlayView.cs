@@ -74,6 +74,7 @@ namespace CS5410
         private Spider spider;
         private List<CentipedeSegment> centipedeSegments;
         private bool gameOver;
+        private bool pause;
         private List<int> scores;
 
         // Timers
@@ -104,6 +105,7 @@ namespace CS5410
             scorpion = null;
             gameOver = false;
             scores = new List<int>() {0, 0, 0, 0, 0};
+            pause = false;
 
             // Initialize Timers
             fleaTimer = TimeSpan.FromSeconds(fleaFrequency);
@@ -272,6 +274,12 @@ namespace CS5410
                             m_keyboardLayout.Left = Keys.Left;
                             m_keyboardLayout.Right = Keys.Right;
                             m_keyboardLayout.Fire = Keys.Space;
+                            m_inputHandler.registerCommand("back", Keys.Escape, true, new InputDeviceHelper.CommandDelegate(navigateBack));
+                            m_inputHandler.registerCommand("up", m_keyboardLayout.Up, false, new InputDeviceHelper.CommandDelegate(moveUp));
+                            m_inputHandler.registerCommand("down", m_keyboardLayout.Down, false, new InputDeviceHelper.CommandDelegate(moveDown));
+                            m_inputHandler.registerCommand("right", m_keyboardLayout.Right, false, new InputDeviceHelper.CommandDelegate(moveRight));
+                            m_inputHandler.registerCommand("left", m_keyboardLayout.Left, false, new InputDeviceHelper.CommandDelegate(moveLeft));
+                            m_inputHandler.registerCommand("fire", m_keyboardLayout.Fire, false, new InputDeviceHelper.CommandDelegate(fireBullet));
                         }
                         if (storage.FileExists("scores.xml"))
                         {
@@ -367,10 +375,11 @@ namespace CS5410
         
         public override void update(GameTime gameTime)
         {
-            if (gameOver)
+            if (gameOver || pause)
             {
                 return;
             }
+
             totalGameTime += gameTime.ElapsedGameTime;
             fleaTimer -= gameTime.ElapsedGameTime;
             spiderTimer -= gameTime.ElapsedGameTime;
@@ -1026,6 +1035,12 @@ namespace CS5410
                 m_spriteBatch.End();
                 return;
             }
+            if (pause)
+            {
+                renderPause();
+                m_spriteBatch.End();
+                return;
+            }
             renderTopBar();
             renderMushrooms();
             renderBullets();
@@ -1057,6 +1072,15 @@ namespace CS5410
             bottom = drawMenuItem(m_font, " ", bottom, Color.Aqua);
             bottom = drawMenuItem(m_font, "Final Score:", bottom, Color.SkyBlue);
             bottom = drawMenuItem(m_font, score.ToString(), bottom, Color.SkyBlue);
+        }
+        
+        private void renderPause()
+        {
+            float bottom = (float) (m_graphics.PreferredBackBufferHeight * 0.2);
+            bottom = drawMenuItem(m_font, "PAUSED", bottom, Color.White);
+            bottom = drawMenuItem(m_font, " ", bottom, Color.Aqua);
+            bottom = drawMenuItem(m_font, "Press SPACE to resume", bottom, Color.SkyBlue);
+            bottom = drawMenuItem(m_font, "Press ESC to return to menu", bottom, Color.DarkRed);
         }
 
         private void renderTopBar( )
@@ -1195,7 +1219,14 @@ namespace CS5410
          */
         private void navigateBack(GameTime gameTime)
         {
-            m_gameState = GameStateEnum.MainMenu;
+            if (pause || gameOver)
+            {
+                m_gameState = GameStateEnum.MainMenu;
+            }
+            else
+            {
+                pause = true;
+            }
         }
         
         public void moveUp(GameTime gameTime)
@@ -1262,6 +1293,11 @@ namespace CS5410
         }
         public void fireBullet(GameTime gameTime)
         {
+            if (pause)
+            {
+                pause = false;
+                return;
+            }
             player.FireDelay -= gameTime.ElapsedGameTime.Milliseconds;
             if (player.FireDelay <= 0 && player.lives > 0)
             {

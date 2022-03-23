@@ -15,13 +15,12 @@ namespace CS5410
         private bool loading;
         private List<int> scores;
         private SpriteFont m_font;
-        private const string MESSAGE = "These are the high scores";
         
         public override void initialize(GraphicsDevice graphicsDevice, GraphicsDeviceManager graphics)
         {
             m_graphics = graphics;
             m_spriteBatch = new SpriteBatch(graphicsDevice);
-            scores = new List<int>();
+            scores = new List<int> { 0, 0, 0, 0, 0 };
             loadScores();
         }
 
@@ -93,10 +92,6 @@ namespace CS5410
             {
                 bottom = drawMenuItem(m_font, (i + 1) + ": " + scores[i], bottom, Color.SkyBlue);
             }
-
-            Vector2 stringSize = m_font.MeasureString(MESSAGE);
-            
-
             m_spriteBatch.End();
         }
         

@@ -34,11 +34,9 @@ namespace CS5410
         public override void render(GameTime gameTime)
         {
             m_spriteBatch.Begin();
-
-            m_spriteBatch.DrawString(m_font, "CREDITS",
-                new Vector2(m_graphics.PreferredBackBufferWidth / 2 - m_font.MeasureString("CREDITS").X / 2, m_graphics.PreferredBackBufferHeight / 8), Color.White);
             
             float bottom = (float) (m_graphics.PreferredBackBufferHeight * 0.1);
+            bottom = drawMenuItem(m_font, "CREDITS", bottom, Color.White);
             bottom = drawMenuItem(m_font,"GAMEPLAY", bottom, Color.Blue);
             bottom = drawMenuItem(m_font, "Hagen Larsen", bottom, Color.SkyBlue);
             bottom = drawMenuItem(m_font, "IMAGES", bottom, Color.Blue);

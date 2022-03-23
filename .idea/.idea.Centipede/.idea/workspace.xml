@@ -7,13 +7,10 @@
   <component name="ChangeListManager">
     <list default="true" id="b9002f50-4518-454e-84a7-29ee3188c448" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Centipede/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Centipede/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/Content/Content.mgcb" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Content/Content.mgcb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/ControlsView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/ControlsView.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/CreditsView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/CreditsView.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/GamePlayView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/GamePlayView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/MainMenuView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/MainMenuView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/Objects/Mushroom.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Objects/Mushroom.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/Renderers/CentipedeRenderer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Renderers/CentipedeRenderer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/Renderers/MushroomRenderer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/Renderers/MushroomRenderer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/HighScoresView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/HighScoresView.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +118,7 @@
       <workItem from="1647913476993" duration="13039000" />
       <workItem from="1647991201359" duration="25000" />
       <workItem from="1647991246438" duration="311000" />
-      <workItem from="1647991806656" duration="3446000" />
+      <workItem from="1647991806656" duration="5168000" />
     </task>
     <servers />
   </component>
@@ -156,29 +153,16 @@
         </breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/centipede/GameStateViews/GamePlayView.cs</url>
-          <line>212</line>
+          <line>214</line>
           <properties documentPath="$PROJECT_DIR$/centipede/GameStateViews/GamePlayView.cs" initialLine="183" containingFunctionPresentation="lambda expression inside method 'finalizeSaveAsync'">
             <startOffsets>
-              <option value="7643" />
+              <option value="7698" />
             </startOffsets>
             <endOffsets>
-              <option value="7709" />
+              <option value="7764" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/centipede/GameStateViews/CreditsView.cs</url>
-          <line>16</line>
-          <properties documentPath="$PROJECT_DIR$/centipede/GameStateViews/CreditsView.cs" initialLine="16" containingFunctionPresentation="method 'initialize'">
-            <startOffsets>
-              <option value="550" />
-            </startOffsets>
-            <endOffsets>
-              <option value="551" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

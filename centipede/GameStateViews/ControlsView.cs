@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.IO;
 using System.IO.IsolatedStorage;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using centipede.Content.Input;
@@ -133,6 +128,15 @@ namespace CS5410
                                     m_keyboardLayout = (Objects.Controls)mySerializer.Deserialize(fs);
                                 }
                             }
+                        }
+                        else
+                        {
+                            m_keyboardLayout = new Objects.Controls();
+                            m_keyboardLayout.Up = Keys.Up;
+                            m_keyboardLayout.Down = Keys.Down;
+                            m_keyboardLayout.Left = Keys.Left;
+                            m_keyboardLayout.Right = Keys.Right;
+                            m_keyboardLayout.Fire = Keys.Space;
                         }
                     }
                     catch (IsolatedStorageException)
