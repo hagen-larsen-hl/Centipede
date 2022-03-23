@@ -128,6 +128,7 @@ namespace CS5410
                         }
                         else
                         {
+                            m_keyboardLayout = new Objects.Controls();
                             m_keyboardLayout.Up = Keys.Up;
                             m_keyboardLayout.Down = Keys.Down;
                             m_keyboardLayout.Left = Keys.Left;

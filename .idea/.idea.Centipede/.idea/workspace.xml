@@ -5,13 +5,7 @@
     <projectFile>centipede/centipede.csproj</projectFile>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b9002f50-4518-454e-84a7-29ee3188c448" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Centipede/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Centipede/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/ControlsView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/ControlsView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/CreditsView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/CreditsView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/GamePlayView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/GamePlayView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/centipede/GameStateViews/HighScoresView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/centipede/GameStateViews/HighScoresView.cs" afterDir="false" />
-    </list>
+    <list default="true" id="b9002f50-4518-454e-84a7-29ee3188c448" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -118,7 +112,7 @@
       <workItem from="1647913476993" duration="13039000" />
       <workItem from="1647991201359" duration="25000" />
       <workItem from="1647991246438" duration="311000" />
-      <workItem from="1647991806656" duration="5168000" />
+      <workItem from="1647991806656" duration="5561000" />
     </task>
     <servers />
   </component>
