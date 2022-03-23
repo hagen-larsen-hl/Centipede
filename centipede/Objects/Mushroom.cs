@@ -19,7 +19,7 @@ namespace CS5410.Objects
                 (int) (center.X - size.X / 2),
                 (int) (center.Y - size.Y / 2),
                 (int) Size.X,
-                (int) Size.Y
+                (int) Size.Y - (state * 2)
             );
         }
         
@@ -30,6 +30,16 @@ namespace CS5410.Objects
         public Rectangle getBoundary()
         {
             return boundary;
+        }
+
+        public void setBoundary()
+        {
+            boundary = new Rectangle(
+                (int) (Center.X - Size.X / 2),
+                (int) (Center.Y - Size.Y / 2),
+                (int) Size.X,
+                (int) (Size.Y - (state * (Size.Y / 4)))
+            );
         }
     }
 }

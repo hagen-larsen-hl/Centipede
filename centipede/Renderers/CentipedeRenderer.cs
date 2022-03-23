@@ -19,7 +19,7 @@ namespace CS5410.Renderers
             
         }
         
-        public void Render(CentipedeSegment centipede, Texture2D spriteSheet, int spriteCount)
+        public void Render(CentipedeSegment centipede, Texture2D spriteSheet, int spriteCount, SpriteEffects effects)
         {
             m_spriteBatch.Draw(
                 spriteSheet,
@@ -33,7 +33,7 @@ namespace CS5410.Renderers
                 Color.White, 
                 0,
                  new Vector2(0, 0),
-                SpriteEffects.FlipHorizontally,
+                effects,
                 0);
         }
     }

@@ -30,8 +30,8 @@ namespace CS5410.Renderers
                 new Rectangle(
                     (mushroom.state * subwidth) + mushroom.state, 
                     0, 
-                    subwidth, 
-                    spriteSheet.Height
+                    subwidth,
+                    (spriteSheet.Height - (2 * mushroom.state))
                     ),
                 Color.White,
                 0,

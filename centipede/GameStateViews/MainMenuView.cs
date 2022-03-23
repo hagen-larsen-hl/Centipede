@@ -105,8 +105,8 @@ namespace CS5410
                 200, 
                 m_currentSelection == MenuState.NewGame ? Color.SkyBlue : Color.Blue);
             bottom = drawMenuItem(m_currentSelection == MenuState.HighScores ? m_fontMenuSelect : m_fontMenu, "High Scores", bottom, m_currentSelection == MenuState.HighScores ? Color.SkyBlue : Color.Blue);
-            bottom = drawMenuItem(m_currentSelection == MenuState.Help ? m_fontMenuSelect : m_fontMenu, "Help", bottom, m_currentSelection == MenuState.Help ? Color.SkyBlue : Color.Blue);
-            bottom = drawMenuItem(m_currentSelection == MenuState.About ? m_fontMenuSelect : m_fontMenu, "About", bottom, m_currentSelection == MenuState.About ? Color.SkyBlue : Color.Blue);
+            bottom = drawMenuItem(m_currentSelection == MenuState.Help ? m_fontMenuSelect : m_fontMenu, "Controls", bottom, m_currentSelection == MenuState.Help ? Color.SkyBlue : Color.Blue);
+            bottom = drawMenuItem(m_currentSelection == MenuState.About ? m_fontMenuSelect : m_fontMenu, "Credits", bottom, m_currentSelection == MenuState.About ? Color.SkyBlue : Color.Blue);
             drawMenuItem(m_currentSelection == MenuState.Quit ? m_fontMenuSelect : m_fontMenu, "Quit", bottom, m_currentSelection == MenuState.Quit ? Color.Red : Color.DarkRed);
 
             m_spriteBatch.End();

@@ -10,6 +10,7 @@ using CS5410.Objects;
 using CS5410.Renderers;
 using Microsoft.VisualBasic.CompilerServices;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -19,9 +20,9 @@ namespace CS5410
     public class GamePlayView : GameStateView
     {
         // Enemy Frequencies
-        private int fleaFrequency = 100;
-        private int spiderFrequency = 100;
-        private int scorpionFrequency = 100;
+        private int fleaFrequency = 5;
+        private int spiderFrequency = 5;
+        private int scorpionFrequency = 5;
         
         // Arena Related Variables
         private int yMargin;
@@ -54,8 +55,15 @@ namespace CS5410
         private Texture2D m_fleaSpriteSheet;
         private Texture2D m_centipedeHeadSpriteSheet;
         private Texture2D m_centipedeBodySpriteSheet;
+        private Texture2D m_centipedeHeadRightSpriteSheet;
+        private Texture2D m_centipedeBodyRightSpriteSheet;
         private Texture2D m_scorpionSpriteSheet;
         private Texture2D m_spiderSpriteSheet;
+        
+        // Audio
+        private SoundEffect m_fire;
+        private SoundEffect m_death;
+        private SoundEffect m_hit;
         
         // Data Structures
         private List<Mushroom> mushrooms;
@@ -130,22 +138,18 @@ namespace CS5410
 
         public void placeMushrooms(Random rand) 
         {
-            for (int i = (rows - (rows - 3)); i <= rows - 6; i++)
+
+            for (int i = 0; i < 20; i++)
             {
-                for (int j = 0; j <= columns - 1; j++)
-                {
-                    int randInt = rand.Next(0, 15);
-                    if (randInt == 0)
-                    {
-                        mushrooms.Add(new Mushroom(
-                            new Vector2(
-                                columnWidth,
-                                rowHeight),
-                                new Vector2(
-                                    (float) (gameLeft + ((j + 0.5) * columnWidth)),
-                                    (float) (gameTop + ((i + 0.5) * rowHeight)))));
-                    }
-                }
+                int y = rand.Next(3, rows - 5);
+                int x = rand.Next(2, columns - 1);
+                mushrooms.Add(new Mushroom(
+                    new Vector2(
+                        columnWidth,
+                        rowHeight),
+                    new Vector2(
+                        (float) (gameLeft + ((x + 0.5) * columnWidth)),
+                        (float) (gameTop + ((y + 0.5) * rowHeight)))));
             }
         }
         public void initializePlayer(int lives, int score)
@@ -342,10 +346,16 @@ namespace CS5410
             m_bulletSprite = contentManager.Load<Texture2D>("SpriteSheets/bullet");
             m_fleaSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/flea");
             m_centipedeHeadSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/centipedeHead");
+            m_centipedeHeadRightSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/centipedeHeadRight");
             m_poisonMushroomSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/poisonMushroom");
             m_centipedeBodySpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/centipedeBody");
+            m_centipedeBodyRightSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/centipedeBodyRight");
             m_spiderSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/spider");
             m_scorpionSpriteSheet = contentManager.Load<Texture2D>("SpriteSheets/scorpion");
+
+            m_fire = contentManager.Load<SoundEffect>("Audio/fire");
+            m_hit = contentManager.Load<SoundEffect>("Audio/hit");
+            m_death = contentManager.Load<SoundEffect>("Audio/death");
         }
 
         public override GameStateEnum processInput(GameTime gameTime)
@@ -389,7 +399,9 @@ namespace CS5410
                 {
                     if (bullet.Boundary.Intersects(mushroom.getBoundary()))
                     {
+                        m_hit.Play();
                         mushroom.state += 1;
+                        mushroom.setBoundary();
                         if (mushroom.state == 4)
                         {
                             mushroomsToRemove.Add(mushroom);
@@ -405,6 +417,7 @@ namespace CS5410
                     
                     if (bullet.Boundary.Intersects(centipede.Boundary))
                     {
+                        m_hit.Play();
                         Mushroom mushroom = new Mushroom(
                             new Vector2(
                                 columnWidth,
@@ -422,6 +435,7 @@ namespace CS5410
                 // Check if hit flea
                 if (flea != null && bullet.Boundary.Intersects(flea.Boundary))
                 {
+                    m_hit.Play();
                     flea = null;
                     player.Score += 200;
                     bulletsToRemove.Add(bullet);
@@ -430,6 +444,7 @@ namespace CS5410
                 // Check if hit scorpion
                 if (scorpion != null && bullet.Boundary.Intersects(scorpion.Boundary))
                 {
+                    m_hit.Play();
                     scorpion = null;
                     player.Score += 1000;
                     bulletsToRemove.Add(bullet);
@@ -438,6 +453,7 @@ namespace CS5410
                 // Check if hit spider
                 if (spider != null && bullet.Boundary.Intersects(spider.Boundary))
                 {
+                    m_hit.Play();
                     spider = null;
                     player.Score += 500;
                     bulletsToRemove.Add(bullet);
@@ -977,6 +993,7 @@ namespace CS5410
         {
             if (boundary.Intersects(player.Boundary))
             {
+                m_death.Play();
                 if (player.lives == 1)
                 {
                     foreach (int score in scores)
@@ -988,6 +1005,8 @@ namespace CS5410
                             break;
                         }
                     }
+
+                    player.lives -= 1;
                     gameOver = true;
                 }
                 else
@@ -1131,11 +1150,41 @@ namespace CS5410
             {
                 if (segment == 0)
                 {
-                    m_centipedeRenderer.Render(centipede, m_centipedeHeadSpriteSheet, 8);
+                    if (centipede.Direction == CentipedeSegment.DirectionEnum.up)
+                    {
+                        m_centipedeRenderer.Render(centipede, m_centipedeHeadSpriteSheet, 8, SpriteEffects.None);
+                    }
+                    else if (centipede.Direction == CentipedeSegment.DirectionEnum.down)
+                    {
+                        m_centipedeRenderer.Render(centipede, m_centipedeHeadSpriteSheet, 8, SpriteEffects.FlipVertically);
+                    }
+                    else if (centipede.Direction == CentipedeSegment.DirectionEnum.right)
+                    {
+                        m_centipedeRenderer.Render(centipede, m_centipedeHeadRightSpriteSheet, 8, SpriteEffects.None);
+                    }
+                    else if (centipede.Direction == CentipedeSegment.DirectionEnum.left)
+                    {
+                        m_centipedeRenderer.Render(centipede, m_centipedeHeadRightSpriteSheet, 8, SpriteEffects.FlipHorizontally);
+                    }
                 }
                 else
                 {
-                    m_centipedeRenderer.Render(centipede, m_centipedeBodySpriteSheet, 8);
+                    if (centipede.Direction == CentipedeSegment.DirectionEnum.up)
+                    {
+                        m_centipedeRenderer.Render(centipede, m_centipedeBodySpriteSheet, 8, SpriteEffects.None);
+                    }
+                    else if (centipede.Direction == CentipedeSegment.DirectionEnum.down)
+                    {
+                        m_centipedeRenderer.Render(centipede, m_centipedeBodySpriteSheet, 8, SpriteEffects.FlipVertically);
+                    }
+                    else if (centipede.Direction == CentipedeSegment.DirectionEnum.right)
+                    {
+                        m_centipedeRenderer.Render(centipede, m_centipedeBodyRightSpriteSheet, 8, SpriteEffects.None);
+                    }
+                    else if (centipede.Direction == CentipedeSegment.DirectionEnum.left)
+                    {
+                        m_centipedeRenderer.Render(centipede, m_centipedeBodyRightSpriteSheet, 8, SpriteEffects.FlipHorizontally);
+                    }
                 }
                 segment++;
             }
@@ -1214,8 +1263,9 @@ namespace CS5410
         public void fireBullet(GameTime gameTime)
         {
             player.FireDelay -= gameTime.ElapsedGameTime.Milliseconds;
-            if (player.FireDelay <= 0)
+            if (player.FireDelay <= 0 && player.lives > 0)
             {
+                m_fire.Play();
                 Bullet bullet = new Bullet(
                     new Vector2(
                         player.Boundary.Left + player.Boundary.Width / 2,
