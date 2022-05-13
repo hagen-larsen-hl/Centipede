@@ -18,3 +18,5 @@ This version was developed in C# using the Monogame game engine framework. It ut
 
 ## Gameplay Images
 ![Gameplay Screenshot](docs/gameplay.png)
+![Controls Customization](docs/controls.png)
+![High Scores](docs/highscores.png)
