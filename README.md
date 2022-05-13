@@ -15,3 +15,6 @@ This version was developed in C# using the Monogame game engine framework. It ut
 ## Build Instructions
 1. Download Visual Studio
 2. Launch the `.sln` file found in the root directory
+
+## Gameplay Images
+![Gameplay Screenshot](docs/gameplay.png)
