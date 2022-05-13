@@ -17,7 +17,7 @@ This version was developed in C# using the Monogame game engine framework. It ut
 2. Launch the `.sln` file found in the root directory
 
 ## Gameplay Images
+![Menu](docs/menu.png)
 ![Gameplay Screenshot](docs/gameplay.png)
 ![Controls Customization](docs/controls.png)
 ![High Scores](docs/highscores.png)
-![Menu](docs/menu.png)
